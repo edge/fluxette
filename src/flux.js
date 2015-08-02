@@ -1,7 +1,7 @@
 import { vectorize, normalize, derive, fluxDispatch, waterfall } from './util';
 
 export default class {
-	constructor(stores = {}) {
+	constructor(stores = {}, auto = true) {
 		// Top-level Stores
 		this.stores = stores;
 		// Optimized iteration vector
@@ -13,7 +13,9 @@ export default class {
 		// Middleware
 		this.middleware = [];
 		// State
-		this.state = derive(this.stores);
+		if (auto) {
+			this.state = derive(this.stores);
+		}
 	}
 	dispatch(...actions) {
 		// Flatten and filter array of actions

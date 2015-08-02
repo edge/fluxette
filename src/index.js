@@ -7,13 +7,14 @@ import select from './ware/select';
 import connect from './react/connect';
 import link from './react/link';
 
+import { deleteFrom, fluxDispatch, initType } from './util';
 
-import { deleteFrom, fluxDispatch } from './util';
+let init = () => ({ type: initType, state: {} });
 
-export { Fluxette, Store, Mapware, connect, link, select };
+export { Fluxette, Store, Mapware, connect, link, select, init };
 
-export default stores => {
-	let flux = new Fluxette(stores);
+export default (...args) => {
+	let flux = new Fluxette(...args);
 	return {
 		dispatch: ::flux.dispatch,
 		hydrate: actions => fluxDispatch(flux, actions),

@@ -12,23 +12,23 @@ export let fluxDispatch = (flux, actions) => {
 // Flatten a Store into an array
 export let vectorize = store => {
 	if (store instanceof Function) {
-		return [store];
+		return [[store, x => x]];
 	}
 	else {
 		let norm = [];
-		$vectorize(store, norm);
+		$vectorize(store, norm, []);
 		return norm;
 	}
 };
 
-let $vectorize = (obj, into) => {
+let $vectorize = (obj, into, cursor) => {
 	for (let i in obj) {
 		let store = obj[i];
 		if (store instanceof Function) {
-			into.push(store);
+			into.push([store, makeCursor([...cursor, i])]);
 		}
 		else {
-			$vectorize(store, into);
+			$vectorize(store, into, [...cursor, i]);
 		}
 	}
 };
@@ -80,8 +80,19 @@ let $normalize = (arr, into) => {
 export let atomicDispatch = (vector, actions) => {
 	for (let i = 0; i < actions.length; i++) {
 		let action = actions[i];
-		for (let j = 0; j < vector.length; j++) {
-			vector[j](action);
+
+		if (action.type === initType) {
+			// Call the stores with a specific rehydration action
+			for (let j = 0; j < vector.length; j++) {
+				let [store, cursor] = vector[j];
+				store({ ...action, state: cursor(action.state) });
+			}
+		}
+		else {
+			// Just call the stores with the action
+			for (let j = 0; j < vector.length; j++) {
+				vector[j][0](action);
+			}
 		}
 	}
 };
@@ -147,6 +158,17 @@ export let shallowEqual = (left, right) => {
 	return true;
 };
 
-// export let isString = val => typeof val === 'string' || val instanceof String;
+export let makeCursor = properties =>
+	obj => {
+		let value = obj;
+		for (let i = 0; i < properties.length; i++) {
+			value = value[properties[i]];
+			if (!(value instanceof Object)) {
+				break;
+			}
+		}
+		return value;
+	};
 
 export let listenerKey = (typeof Symbol !== 'undefined') ? Symbol() : '@@fluxetteListener';
+export let initType = '@@fluxetteInit';

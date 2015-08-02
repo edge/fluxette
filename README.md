@@ -487,8 +487,6 @@ $ npm test
 ## Todo
 * implement rewinding
 * React and non-React builds
-* declarative rehydration
-* make isomorphic easier
 * add ~~lint~~, code coverage, CI, badges, and all that jazz
 * add more examples (async, router, ~~flux-comparison~~, etc.)
 * rewrite docs
